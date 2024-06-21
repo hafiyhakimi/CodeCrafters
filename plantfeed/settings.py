@@ -185,7 +185,7 @@ STATICFILES_DIRS = (
 )
 
 AUTH_USER_MODEL = 'member.Person'
-OPENAI_API_KEY = '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'
+OPENAI_API_KEY = env("OPENAI_API_KEY")
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
