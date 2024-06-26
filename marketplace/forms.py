@@ -1,5 +1,5 @@
 from django import forms
-from .models import prodProduct
+from .models import prodProduct, prodStock
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -9,7 +9,6 @@ class ProductForm(forms.ModelForm):
             'productDesc',
             'productCategory',
             'productPrice',
-            'productStock',
             'productPhoto',
         ]
 
@@ -20,4 +19,13 @@ class ProductForm(forms.ModelForm):
         self.fields['productDesc'].widget.attrs.update({'placeholder': 'Enter product description'})
         self.fields['productCategory'].widget.attrs.update({'placeholder': 'Enter product category'})
         self.fields['productPrice'].widget.attrs.update({'placeholder': 'Enter product price'})
-        self.fields['productStock'].widget.attrs.update({'placeholder': 'Enter product stock'})
+        self.fields['productPhoto'].widget.attrs.update({'placeholder': 'Upload product photo'})
+        
+class ProductStockForm(forms.ModelForm):
+    class Meta:
+        model = prodStock
+        fields = ['stock']
+
+    def __init__(self, *args, **kwargs):
+        super(ProductStockForm, self).__init__(*args, **kwargs)
+        self.fields['stock'].widget.attrs.update({'placeholder': 'Enter product stock'})

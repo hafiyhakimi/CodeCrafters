@@ -15,10 +15,10 @@ from django.dispatch import receiver
 from cryptography.fernet import Fernet
 from member.models import Person
 # from sharing.models import Feed
-from .models import prodProduct
+from .models import prodProduct, prodStock
 from basket.models import Basket, prodReview
 import re
-from .forms import ProductForm
+from .forms import ProductForm, ProductStockForm
 # from .models import Person
 
 # Create your views here.
@@ -35,13 +35,22 @@ from .forms import ProductForm
 def mainMarketplace(request):
     try:
         marketplace=prodProduct.objects.all()
-        # allBasket=Basket.objects.all()
+        
+        # Create a dictionary to store product and stock pairs
+        product_stock_pairs = []
+
+        for product in marketplace:
+            stock = prodStock.objects.filter(product=product).first()
+            product_stock_pairs.append({
+                'product': product,
+                'stock': stock
+            })
         
         person = Person.objects.get(Email=request.session['Email'])
         
         allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
         user=Person.objects.all()
-        return render(request,'MainMarketplace.html',{'marketplace':marketplace, 'allBasket':allBasket, 'person':person, 'user':user})
+        return render(request,'MainMarketplace.html',{'product_stock_pairs': product_stock_pairs, 'allBasket':allBasket, 'person':person, 'user':user})
     except prodProduct.DoesNotExist:
         raise Http404('Data does not exist')
     
@@ -61,7 +70,9 @@ def viewProduct(request,pk):
         product = prodProduct.objects.get(productid=pk)
         reviews = prodReview.objects.filter(productid=product)
         allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
-        return render(request,'ViewProduct.html',{'product':product, 'person':person, 'allBasket':allBasket, 'reviews':reviews})
+        stock = prodStock.objects.get(product_id=pk)
+            
+        return render(request,'ViewProduct.html',{'product':product, 'stock': stock, 'person':person, 'allBasket':allBasket, 'reviews':reviews})
     except prodProduct.DoesNotExist:
         raise Http404('Data does not exist')
     
@@ -71,7 +82,18 @@ def viewSeller(request,pk):
         seller = Person.objects.get(id=pk)
         products = prodProduct.objects.filter(Person_fk=seller)
         allBasket = Basket.objects.filter(Person_fk_id=person.id,is_checkout=0)
-        return render(request,'ViewSeller.html',{'products':products, 'person':person, 'seller':seller, 'allBasket':allBasket})
+        
+        # Create a dictionary to store product and stock pairs
+        product_stock_pairs = []
+
+        for product in products:
+            stock = prodStock.objects.filter(product=product).first()
+            product_stock_pairs.append({
+                'product': product,
+                'stock': stock
+        })
+            
+        return render(request,'ViewSeller.html',{'product_stock_pairs': product_stock_pairs, 'person':person, 'seller':seller, 'allBasket':allBasket})
     except Person.DoesNotExist:
         raise Http404('Seller does not exist')
     except prodProduct.DoesNotExist:
@@ -157,10 +179,11 @@ def sellProduct(request, fk1):
     person = get_object_or_404(Person, pk=fk1)
 
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
+        productform = ProductForm(request.POST, request.FILES)
+        stockform = ProductStockForm(request.POST)
         
-        if form.is_valid():
-            product = form.save(commit=False)
+        if productform.is_valid() and stockform.is_valid():
+            product = productform.save(commit=False)
             product.Person_fk = person
             
             # Custom validation for product name
@@ -183,30 +206,40 @@ def sellProduct(request, fk1):
                 product.productCategory = customCategory
 
             # Custom validation for product price
-            price_parts = str(product.productPrice).split('.')
             price_pattern = r'^\d+(\.\d{1,2})?$'
             if not re.match(price_pattern, str(product.productPrice)):
                 messages.error(request, 'Product price should only contain digits and allow up to two digits after the decimal point.')
                 return redirect(request.META.get('HTTP_REFERER'))
 
+            product.save()
+
+            # Save stock form with the saved product instance
+            stock = stockform.save(commit=False)
+            stock.product = product
+
             # Custom validation for product stock
-            if not str(product.productStock).isdigit():
+            if not str(stock.stock).isdigit():
                 messages.error(request, 'Product stock should only contain digits.')
+                product.delete()  # delete the saved product if stock validation fails
                 return redirect(request.META.get('HTTP_REFERER'))
 
-            product.save()
+            stock.save()
             messages.success(request, 'Product Has Been Added Successfully..!')
             return redirect('marketplace:MainMarketplace')
         else:
             # Display form errors
-            for field in form.errors:
-                for error in form.errors[field]:
+            for field, errors in productform.errors.items():
+                for error in errors:
                     messages.error(request, f"{field}: {error}")
 
+            for field, errors in stockform.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
-        form = ProductForm()
-    
-    return render(request, 'ProductForm.html', {'form': form, 'update': False, 'person': person})
+        productform = ProductForm()
+        stockform = ProductStockForm()
+
+    return render(request, 'ProductForm.html', {'productform': productform, 'stockform': stockform, 'update': False, 'person': person})
 
 def deleteProduct(request, fk1):
     try:
@@ -315,17 +348,19 @@ def unrestrictProduct(request, fk1):
 
 def updateProduct(request, fk1):
     product = get_object_or_404(prodProduct, pk=fk1)
-    person = request.user
+    person=Person.objects.get(Email=request.session['Email'])
+    stock = get_object_or_404(prodStock, product=product)
     
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
+        productform = ProductForm(request.POST, request.FILES, instance=product)
+        stockform = ProductStockForm(request.POST, instance=stock)
         
-        if form.is_valid():
-            updated_product = form.save(commit=False)
+        if productform.is_valid() and stockform.is_valid():
+            updated_product = productform.save(commit=False)
             
             # Custom validation for product name
-            if len(updated_product.productName) > 20:
-                messages.error(request, 'Product name cannot be more than 20 characters.')
+            if len(updated_product.productName) > 30:
+                messages.error(request, 'Product name cannot be more than 30 characters.')
                 return redirect(request.META.get('HTTP_REFERER'))
 
             # Custom validation for product description
@@ -344,31 +379,41 @@ def updateProduct(request, fk1):
 
             # Custom validation for product price
             product_price = str(updated_product.productPrice)
-            price_parts = product_price.split('.')
             price_pattern = r'^\d+(\.\d{1,2})?$'
             if not re.match(price_pattern, product_price):
                 messages.error(request, 'Product price should only contain digits and allow up to two digits after the decimal point.')
                 return redirect(request.META.get('HTTP_REFERER'))
 
+            updated_product.save()
+
+            # Save stock form with the saved product instance
+            updated_stock = stockform.save(commit=False)
+            updated_stock.product = updated_product
+
             # Custom validation for product stock
-            if not str(updated_product.productStock).isdigit():
+            if not str(updated_stock.stock).isdigit():
                 messages.error(request, 'Product stock should only contain digits.')
                 return redirect(request.META.get('HTTP_REFERER'))
 
-            updated_product.save()
+            updated_stock.save()
+
             messages.success(request, 'Product has been updated successfully.')
-            return redirect('marketplace:MyMarketplace')
+            return redirect('marketplace:viewSeller', pk=person.id)
         else:
             # Display form errors
-            # Display form errors
-            for field in form.errors:
-                for error in form.errors[field]:
+            for field, errors in productform.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+
+            for field, errors in stockform.errors.items():
+                for error in errors:
                     messages.error(request, f"{field}: {error}")
 
     else:
-        form = ProductForm(instance=product)
+        productform = ProductForm(instance=product)
+        stockform = ProductStockForm(instance=stock)
     
-    return render(request, 'ProductForm.html', {'form': form, 'product': product, 'update': True, 'person': person})
+    return render(request, 'ProductForm.html', {'productform': productform, 'stockform': stockform, 'update': True, 'product': product, 'stock': stock, 'person': person})
     
 def buy_now(request, fk1,fk2):
     product = prodProduct.objects.get(pk=fk1)
