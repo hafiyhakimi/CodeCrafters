@@ -1,7 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
-# STRIPE Implementation Try 1
 from django.http import JsonResponse
 import stripe
 from django.shortcuts import redirect
