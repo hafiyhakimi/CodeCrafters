@@ -1,4 +1,26 @@
-# Use an official Python runtime as a parent image
+# Stage 1: Build Stage
+FROM python:3.9-slim as builder
+
+# Set environment variables to avoid interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install system dependencies and clean up
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    libpq-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy the requirements file into the container
+COPY requirements.txt /app/
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Final Stage
 FROM python:3.9-slim
 
 # Set environment variables to avoid interactive prompts during installation
@@ -7,21 +29,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    default-libmysqlclient-dev \
-    libpq-dev \ 
-    && apt-get clean
-
-# Copy the requirements file into the container
-COPY requirements.txt /app/
-
-# Print the contents of the requirements file for debugging
-RUN cat /app/requirements.txt
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the installed packages from the builder stage
+COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy the rest of the application code into the container
 COPY . /app/
@@ -35,5 +45,5 @@ EXPOSE 8000
 # Define environment variable
 ENV DJANGO_SETTINGS_MODULE=plantfeed.settings
 
-# Run the application
-# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "plantfeed.wsgi:application"]
+# Run the application with gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "plantfeed.wsgi:application"]
