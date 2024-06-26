@@ -6,7 +6,7 @@ services:
     container_name: mysql_db
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: newplantfeed2
+      MYSQL_DATABASE: codecrafters
       MYSQL_PASSWORD: ""
     ports:
       - "3306:3306"
@@ -36,7 +36,7 @@ services:
       - db
     environment:
       DJANGO_SETTINGS_MODULE: plantfeed.settings
-      DATABASE_URL: mysql://root:@db:3306/newplantfeed2
+      DATABASE_URL: mysql://root:@db:3306/codecrafters
 
 volumes:
   db_data:

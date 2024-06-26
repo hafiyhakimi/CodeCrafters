@@ -138,55 +138,54 @@
             <div class="container py-5">
               <div class="main-timeline-2">
                 {% csrf_token %}
-                {% if marketplace %}
-                {% for item in marketplace reversed %}
-                {% if item.productStock > 0 %}
+                {% if product_stock_pairs %}
+                {% for item in product_stock_pairs reversed %}
                 {% if person.UserLevel != "admin" %}
-                  {% if not item.restricted %}
+                  {% if not item.product.restricted %}
                   <div class="timeline-2 left-2">
                     <div class="card" style="width: 650px;">
                       <table style="border: 0; margin-right:550px">
                           <th>
                               <div class="user-image">
-                                  <img class="rounded-circle" src="media/{{ item.Person_fk.Photo }}" alt="..." style="width: 45px; height: 45px; margin: 10px;">
+                                  <img class="rounded-circle" src="media/{{ item.product.Person_fk.Photo }}" alt="..." style="width: 45px; height: 45px; margin: 10px;">
                               </div>
                           </th>
                           <th>
                               <div class="username">
                                   {% comment %} <span class="username">{{ item.Person_fk.Username }}</span> {% endcomment %}
-                                  <a href="{% url 'marketplace:viewSeller' item.Person_fk.id %}" style="color: black;">{{item.Person_fk.Username}}</a><br>
+                                  <a href="{% url 'marketplace:viewSeller' item.product.Person_fk.id %}" style="color: black;">{{item.product.Person_fk.Username}}</a><br>
                               </div>               
                           </th>
                       </table>
                       
                       <div class="card-body p-4">
-                        <a href="{% url 'marketplace:viewProduct' item.productid %}" style="color: black;"><b>{{item.productName}}</b></a><br>
+                        <a href="{% url 'marketplace:viewProduct' item.product.productid %}" style="color: black;"><b>{{item.product.productName}}</b></a><br>
                         {% comment %} <b>{{item.productName}}</b> {% endcomment %}
                         
                       </div>
                       
-                      <img src="media/{{item.productPhoto}}" class="card-img-top"
+                      <img src="media/{{item.product.productPhoto}}" class="card-img-top"
                         alt="Responsive image" style="width: 550px;margin-left: 45px;">
                         <table style="border: none;  ">
                           <th style="padding-bottom: 0; align-items: center;">
-                            <p class="text-muted mb-4" style="font-size: x-small; padding: 0;" value="{{ item.timePosted }}"><i class="far fa-clock" aria-hidden="true"></i>{{ item.timePosted }}</p>
+                            <p class="text-muted mb-4" style="font-size: x-small; padding: 0;" value="{{ item.product.timePosted }}"><i class="far fa-clock" aria-hidden="true"></i>{{ item.product.timePosted }}</p>
                         </th>
                       
                         <div class="card-body p-4">
-                          <b>RM {{item.productPrice}}</b>
-                          <b style="float: right">{{item.productStock}} stock left</b><br><br>
-                          <p class="mb-0" value="{{ item.productDesc }}" style="text-align: justify;">{{ item.productDesc }}</p>
+                          <b>RM {{item.product.productPrice}}</b>
+                          <b style="float: right">{{item.stock.stock}} stock left</b><br><br>
+                          <p class="mb-0" value="{{ item.product.productDesc }}" style="text-align: justify;">{{ item.product.productDesc }}</p>
                           <br>
                           {% if person.UserLevel != "admin" %}
-                            {% if item.Person_fk.Email != request.session.Email %}
+                            {% if item.product.Person_fk.Email != request.session.Email %}
                             
-                            <form id="buy-form" method="post" action="{% url 'marketplace:add_to_basket' item.productid person.id %}">
+                            <form id="buy-form" method="post" action="{% url 'marketplace:add_to_basket' item.product.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
                               <button type="submit" style="float: right; margin-right: 5px">Add to basket</button>
                             </form>
                           
-                            <form id="buy-form" method="post" action="{% url 'marketplace:buy_now' item.productid person.id %}">
+                            <form id="buy-form" method="post" action="{% url 'marketplace:buy_now' item.product.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
                               <button type="submit" style="float: right; margin-right: 10px" id="buy-now-btn">Buy now</button>
@@ -194,7 +193,7 @@
                         
                             <br><br>
                             {% endif %}
-                            {% if item.Person_fk.Email == request.session.Email %}
+                            {% if item.product.Person_fk.Email == request.session.Email %}
                               {% comment %} <a href="{% url 'marketplace:DeleteProduct' item.productid %}" type="button" id="delete-button" style="visibility: visible; float: right; margin-right: 10px" onClick="deleteProduct()" class="btn btn-danger"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                               </svg></a> {% endcomment %}
@@ -203,7 +202,7 @@
                                   <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                                 </svg>
                               </a>                  
-                              <a href="{% url 'marketplace:UpdateProduct' item.productid %}" type="button" id="update-button" style="visibility: visible; margin-right: 10px; float: right" class="btn btn-primary">
+                              <a href="{% url 'marketplace:UpdateProduct' item.product.productid %}" type="button" id="update-button" style="visibility: visible; margin-right: 10px; float: right" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                   <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                                 </svg>
@@ -254,45 +253,45 @@
                       <table style="border: 0; margin-right:550px">
                           <th>
                               <div class="user-image">
-                                  <img class="rounded-circle" src="media/{{ item.Person_fk.Photo }}" alt="..." style="width: 45px; height: 45px; margin: 10px;">
+                                  <img class="rounded-circle" src="media/{{ item.product.Person_fk.Photo }}" alt="..." style="width: 45px; height: 45px; margin: 10px;">
                               </div>
                           </th>
                           <th>
                               <div class="username">
                                   {% comment %} <span class="username">{{ item.Person_fk.Username }}</span> {% endcomment %}
-                                  <a href="{% url 'marketplace:viewSeller' item.Person_fk.id %}" style="color: black;">{{item.Person_fk.Username}}</a><br>
+                                  <a href="{% url 'marketplace:viewSeller' item.product.Person_fk.id %}" style="color: black;">{{item.product.Person_fk.Username}}</a><br>
                               </div>               
                           </th>
                       </table>
                       
                       <div class="card-body p-4">
-                        <a href="{% url 'marketplace:viewProduct' item.productid %}" style="color: black;"><b>{{item.productName}}</b></a><br>
+                        <a href="{% url 'marketplace:viewProduct' item.product.productid %}" style="color: black;"><b>{{item.product.productName}}</b></a><br>
                         {% comment %} <b>{{item.productName}}</b> {% endcomment %}
                         
                       </div>
                       
-                      <img src="media/{{item.productPhoto}}" class="card-img-top"
+                      <img src="media/{{item.product.productPhoto}}" class="card-img-top"
                         alt="Responsive image" style="width: 550px;margin-left: 45px;">
                         <table style="border: none;  ">
                           <th style="padding-bottom: 0; align-items: center;">
-                            <p class="text-muted mb-4" style="font-size: x-small; padding: 0;" value="{{ item.timePosted }}"><i class="far fa-clock" aria-hidden="true"></i>{{ item.timePosted }}</p>
+                            <p class="text-muted mb-4" style="font-size: x-small; padding: 0;" value="{{ item.product.timePosted }}"><i class="far fa-clock" aria-hidden="true"></i>{{ item.product.timePosted }}</p>
                         </th>
                       
                         <div class="card-body p-4">
-                          <b>RM {{item.productPrice}}</b>
-                          <b style="float: right">{{item.productStock}} stock left</b><br><br>
-                          <p class="mb-0" value="{{ item.productDesc }}" style="text-align: justify;">{{ item.productDesc }}</p>
+                          <b>RM {{item.product.productPrice}}</b>
+                          <b style="float: right">{{item.stock.stock}} stock left</b><br><br>
+                          <p class="mb-0" value="{{ item.product.productDesc }}" style="text-align: justify;">{{ item.product.productDesc }}</p>
                           <br>
                           {% if person.UserLevel != "admin" %}
-                            {% if item.Person_fk.Email != request.session.Email %}
+                            {% if item.product.Person_fk.Email != request.session.Email %}
                             
-                            <form id="buy-form" method="post" action="{% url 'marketplace:add_to_basket' item.productid person.id %}">
+                            <form id="buy-form" method="post" action="{% url 'marketplace:add_to_basket' item.product.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
                               <button type="submit" style="float: right; margin-right: 5px">Add to basket</button>
                             </form>
                           
-                            <form id="buy-form" method="post" action="{% url 'marketplace:buy_now' item.productid person.id %}">
+                            <form id="buy-form" method="post" action="{% url 'marketplace:buy_now' item.product.productid person.id %}">
                               {% csrf_token %} 
                               <input type="hidden" name="productqty" value="1">
                               <button type="submit" style="float: right; margin-right: 10px" id="buy-now-btn">Buy now</button>
@@ -300,7 +299,7 @@
                         
                             <br><br>
                             {% endif %}
-                            {% if item.Person_fk.Email == request.session.Email %}
+                            {% if item.product.Person_fk.Email == request.session.Email %}
                               {% comment %} <a href="{% url 'marketplace:DeleteProduct' item.productid %}" type="button" id="delete-button" style="visibility: visible; float: right; margin-right: 10px" onClick="deleteProduct()" class="btn btn-danger"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                               </svg></a> {% endcomment %}
@@ -309,7 +308,7 @@
                                   <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"/>
                                 </svg>
                               </a>                  
-                              <a href="{% url 'marketplace:UpdateProduct' item.productid %}" type="button" id="update-button" style="visibility: visible; margin-right: 10px; float: right" class="btn btn-primary">
+                              <a href="{% url 'marketplace:UpdateProduct' item.product.productid %}" type="button" id="update-button" style="visibility: visible; margin-right: 10px; float: right" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
                                   <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
                                 </svg>
@@ -319,10 +318,10 @@
                           {% endif %}
                           {% if person.UserLevel == "admin" %}
                               {% if not item.restricted %}
-                                <a href="{% url 'marketplace:restrictProduct' item.productid %}" class="btn btn-danger" style="float: right"><b>Restrict Product</b></a>
+                                <a href="{% url 'marketplace:restrictProduct' item.product.productid %}" class="btn btn-danger" style="float: right"><b>Restrict Product</b></a>
                               {% endif %}
                               {% if item.restricted %}
-                                <a href="{% url 'marketplace:unrestrictProduct' item.productid %}" class="btn btn-block" style="float: right"><b>Unrestrict Product</b></a>
+                                <a href="{% url 'marketplace:unrestrictProduct' item.product.productid %}" class="btn btn-block" style="float: right"><b>Unrestrict Product</b></a>
                               {% endif %}
                           {% endif %}
                         <!-- Modal -->
@@ -347,12 +346,11 @@
                         </div>
 
                         <!-- Hidden input field to store product ID -->
-                        <input type="hidden" id="productIdInput" value={{ item.productid }}>
+                        <input type="hidden" id="productIdInput" value={{ item.product.productid }}>
                       </div>
                     </div>
 
-                  </div>
-                {% endif %}
+                  </div>s
                 {% endif %}
                 {% endfor %}
                 {% else %}

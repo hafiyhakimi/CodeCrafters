@@ -88,7 +88,7 @@
             <div class="col-md-6 product-info">
                 <h2>{{ product.productName }}</h2>
                 <p class="product-price">Price: RM {{ product.productPrice }}</p>
-                <p class="product-stock">Stock: {{ product.productStock }} left</p>
+                <p class="product-stock">Stock: {{ stock.stock }} left</p>
                 <p class="product-category">Category: {{ product.productCategory }}</p>
                 <p>{{ product.productDesc }}</p>
                 {% if product.Person_fk.Email != request.session.Email %}

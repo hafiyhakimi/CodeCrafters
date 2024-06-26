@@ -23,13 +23,13 @@ class prodProduct(models.Model):
     productName = models.CharField(max_length=255, blank=True)
     productDesc = models.CharField(max_length=1500,blank=True)
     productCategory = models.CharField(max_length=255, blank=True)
-    productPrice = models.DecimalField(max_digits=4, decimal_places=2)
-    productStock = models.IntegerField(default=0)
+    productPrice = models.DecimalField(max_digits=20, decimal_places=2)
     productPhoto = models.ImageField(upload_to ='images/', null=True)
     productRating = models.IntegerField(default=0)
     timePosted = models.DateTimeField(default=datetime.now, blank=True)
     Person_fk = models.ForeignKey(Person, on_delete=models.CASCADE)
     restricted = models.BooleanField(default=False)
+    productSold = models.IntegerField(default=0)
     
     def save(self):
         super().save()
@@ -37,6 +37,16 @@ class prodProduct(models.Model):
     
     def deleteProduct(self):
         super().delete()
+        
+class prodStock(models.Model):
+    class Meta:
+        db_table = 'prodStock'
+    
+    product = models.OneToOneField(prodProduct, on_delete=models.CASCADE, related_name='stock')
+    stock = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.product.productName} - Stock: {self.stock}'
 
     # def get_total_price(self):
 
