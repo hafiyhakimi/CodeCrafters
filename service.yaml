@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: codecrafters-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: serving-web-content-codecrafters
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codecrafters-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: serving-web-content-codecrafters
+  template:
+    metadata:
+      labels:
+        app: serving-web-content-codecrafters
+    spec:
+      containers:
+      - name: serving-web-content-codecrafters
+        image: hafiyhakimi/codecrafters-main:latest
+        ports:
+        - containerPort: 8000 
