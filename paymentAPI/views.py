@@ -1,7 +1,4 @@
 from django.shortcuts import render
-
-
-
 from django.http import JsonResponse
 import stripe
 from django.shortcuts import redirect
