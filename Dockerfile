@@ -46,5 +46,7 @@ EXPOSE 8000
 # Define environment variable
 ENV DJANGO_SETTINGS_MODULE=plantfeed.settings
 
+CMD python manage.py runserver 
+
 # Run the application with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "plantfeed.wsgi:application"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "plantfeed.wsgi:application"]
