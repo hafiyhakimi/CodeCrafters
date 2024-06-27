@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     default-libmysqlclient-dev \
     libpq-dev \
+    libmariadb-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
