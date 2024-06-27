@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     gcc \
     default-libmysqlclient-dev \
     libpq-dev \
-    libmariadb3 \
+    libmariadb-dev-compat \
+    libmariadb-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
@@ -29,6 +30,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Set the working directory in the container
 WORKDIR /app
+
+# Install the runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libmariadb-dev-compat \
+    libmariadb-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy the installed packages from the builder stage
 COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
