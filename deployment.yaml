@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: codecrafters-deployment
-  namespace: kubernetes-dashboard 
 spec:
   replicas: 2
   selector:
