@@ -8,5 +8,5 @@ spec:
     app: serving-web-content-codecrafters
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
+      port: 8080
+      targetPort: 8080
